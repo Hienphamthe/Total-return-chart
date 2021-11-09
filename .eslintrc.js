@@ -4,13 +4,13 @@ module.exports = {
 		node: true,
 		browser: true
 	},
-	// plugins: ['import'],
+	plugins: ['import'],
 	extends: [
 		'plugin:vue/recommended',
 		'eslint:recommended',
 		'@vue/typescript/recommended',
 		'@vue/prettier',
-		'@vue/prettier/@typescript-eslint',
+		'@vue/prettier/@typescript-eslint'
 	],
 	parserOptions: {
 		ecmaVersion: 2020
@@ -46,6 +46,6 @@ module.exports = {
 			}
 		],
 		curly: 'error',
-		'no-sequences': 'error',
-	},
+		'no-sequences': 'error'
+	}
 };
