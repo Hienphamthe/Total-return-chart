@@ -1,14 +1,26 @@
-import rawDividend from './assets/data/MSFTDividend.json';
-import rawPrice from './assets/data/MSFTPrice.json';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import rawDividendMSFT from './assets/data/MSFTDividend.json';
+import rawPriceMSFT from './assets/data/MSFTPrice.json';
+import rawDividendXOM from './assets/data/XOMDividend.json';
+import rawPriceXOM from './assets/data/XOMPrice.json';
 import {DividendData, StockPriceData} from './types';
 
-const dividend: Array<DividendData> = rawDividend.map((v) => ({
-	timestamp: new Date(v.Date).getTime(),
-	value: v.Dividends
-}));
-const price: Array<StockPriceData> = rawPrice.map((v) => ({timestamp: new Date(v.Date).getTime(), value: v.Close}));
+const getDividendData = (rawData: any): DividendData[] =>
+	rawData.map((v: any) => ({
+		timestamp: new Date(v.Date).getTime(),
+		value: v.Dividends
+	}));
+
+const getPriceData = (rawData: any): StockPriceData[] =>
+	rawData.map((v: any) => ({timestamp: new Date(v.Date).getTime(), value: v.Close}));
 
 export default {
-	price,
-	dividend
+	msft: {
+		price: getPriceData(rawPriceMSFT),
+		dividend: getDividendData(rawDividendMSFT)
+	},
+	xom: {
+		price: getPriceData(rawPriceXOM),
+		dividend: getDividendData(rawDividendXOM)
+	}
 };
