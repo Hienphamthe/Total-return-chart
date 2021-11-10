@@ -1,8 +1,8 @@
 export interface StockPriceData {
-	timestamp: Date;
+	timestamp: number;
 	value: number;
 }
 export interface DividendData {
-	timestamp: Date;
+	timestamp: number;
 	value: number;
 }
