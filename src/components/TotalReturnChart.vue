@@ -1,10 +1,13 @@
 <script lang="ts">
-	import {defineComponent} from '@vue/composition-api';
+	import {computed, defineComponent, ref} from '@vue/composition-api';
 	import {ApexOptions} from 'apexcharts';
+	import VueSelect from 'vue-select';
 
-	import {DividendData, StockPriceData} from '@/types';
+	import calculateChartData from './calculateChartData';
+	import {MockData} from '@/types';
 
 	const initialCapital = 1000;
+	const compareOptions = ['APPL', 'XOM'];
 
 	export default defineComponent({
 		props: {
@@ -13,55 +16,33 @@
 				required: true
 			},
 			mockData: {
-				type: Object as () => {
-					price: StockPriceData[];
-					dividend: DividendData[];
-				},
+				type: Object as () => Record<string, MockData>,
 				required: true
 			}
 		},
+		components: {
+			VueSelect
+		},
 		setup(props) {
-			const mockData = props.mockData;
-			const calculateGain = (currentPrice: number, numberOfShare: number, remainCapital: number) =>
-				((currentPrice * numberOfShare + remainCapital) / initialCapital - 1) * 100;
+			const comparedChartData = ref();
 
-			const capitalGainChartData = () => {
-				const numberOfShare = Math.floor(initialCapital / mockData.price[0].value);
-				const remainCapital = initialCapital % mockData.price[0].value;
+			const {totalReturnChartData, capitalGainChartData} = calculateChartData(initialCapital, props.mockData.msft);
 
-				return mockData.price.map((v, i) => [
-					v.timestamp,
-					i === 0 ? 0 : calculateGain(v.value, numberOfShare, remainCapital)
-				]);
-			};
-
-			const totalReturnChartData = () => {
-				let numberOfShare = Math.floor(initialCapital / mockData.price[0].value);
-				let remainCapital = initialCapital % mockData.price[0].value;
-				let chartData: number[][] = [];
-				let exDivDate = 0;
-
-				mockData.price.forEach((priceData, i) => {
-					mockData.dividend.some((dividendData) => {
-						const isReinvestingDividend =
-							priceData.timestamp >= dividendData.timestamp &&
-							Math.min(priceData.timestamp, dividendData.timestamp) > exDivDate;
-
-						if (isReinvestingDividend) {
-							const returnOnDividend = numberOfShare * dividendData.value;
-							numberOfShare = numberOfShare + Math.floor((returnOnDividend + remainCapital) / priceData.value);
-							remainCapital = (returnOnDividend + remainCapital) % priceData.value;
-							exDivDate = dividendData.timestamp;
-							return true;
-						}
-					});
-					chartData.push([
-						priceData.timestamp,
-						i === 0 ? 0 : calculateGain(priceData.value, numberOfShare, remainCapital)
-					]);
-				});
-
-				return chartData;
+			const handleCompare = (value: string): void => {
+				if (!value) {
+					comparedChartData.value = undefined;
+					return;
+				}
+				comparedChartData.value =
+					value === compareOptions[0]
+						? {
+								name: `Total Return Apple`,
+								data: calculateChartData(initialCapital, props.mockData.appl).totalReturnChartData
+						  }
+						: {
+								name: `Total Return ExxonMobil`,
+								data: calculateChartData(initialCapital, props.mockData.xom).totalReturnChartData
+						  };
 			};
 
 			const chartOptionsApex: ApexOptions = {
@@ -89,18 +70,19 @@
 					dashArray: 0
 				}
 			};
-			const seriesApex = [
-				{
+
+			const seriesApex = computed(() => [
+				comparedChartData.value ?? {
 					name: `Capital Gain ${props.companyName}`,
-					data: capitalGainChartData()
+					data: capitalGainChartData
 				},
 				{
 					name: `Total Return ${props.companyName}`,
-					data: totalReturnChartData()
+					data: totalReturnChartData
 				}
-			];
+			]);
 
-			return {chartOptionsApex, seriesApex};
+			return {chartOptionsApex, seriesApex, compareOptions, handleCompare};
 		}
 	});
 </script>
@@ -108,6 +90,15 @@
 <template>
 	<div class="my-5">
 		<h1 class="font-bold">Total Return Chart</h1>
+		<div class="my-5 flex justify-end">
+			<vue-select :options="compareOptions" placeholder="Compare" class="dropdown" @input="handleCompare"></vue-select>
+		</div>
 		<apexchart height="500" type="line" :options="chartOptionsApex" :series="seriesApex"></apexchart>
 	</div>
 </template>
+
+<style>
+	.dropdown {
+		min-width: 150px;
+	}
+</style>

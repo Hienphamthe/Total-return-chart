@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import rawDividendAPPL from './assets/data/APPLDividend.json';
+import rawPriceAPPL from './assets/data/APPLPrice.json';
 import rawDividendMSFT from './assets/data/MSFTDividend.json';
 import rawPriceMSFT from './assets/data/MSFTPrice.json';
 import rawDividendXOM from './assets/data/XOMDividend.json';
@@ -22,5 +24,9 @@ export default {
 	xom: {
 		price: getPriceData(rawPriceXOM),
 		dividend: getDividendData(rawDividendXOM)
+	},
+	appl: {
+		price: getPriceData(rawPriceAPPL),
+		dividend: getDividendData(rawDividendAPPL)
 	}
 };
