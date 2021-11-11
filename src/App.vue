@@ -17,7 +17,6 @@
 	<div id="app">
 		<app-header class="app-header" />
 		<total-return-chart :company-name="'Microsoft'" :mock-data="mockData.msft" />
-		<total-return-chart :company-name="'ExxonMobil'" :mock-data="mockData.xom" />
 	</div>
 </template>
 

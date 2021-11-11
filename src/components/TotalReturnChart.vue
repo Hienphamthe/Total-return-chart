@@ -1,7 +1,6 @@
 <script lang="ts">
 	import {defineComponent} from '@vue/composition-api';
-	import {Axis, AxisLabelsFormatterContextObject} from 'highcharts';
-	import {Chart} from 'highcharts-vue';
+	import {ApexOptions} from 'apexcharts';
 
 	import {DividendData, StockPriceData} from '@/types';
 
@@ -20,9 +19,6 @@
 				},
 				required: true
 			}
-		},
-		components: {
-			Chart
 		},
 		setup(props) {
 			const mockData = props.mockData;
@@ -68,32 +64,43 @@
 				return chartData;
 			};
 
-			const chartOptions = {
-				title: {
-					text: undefined
+			const chartOptionsApex: ApexOptions = {
+				chart: {
+					id: 'total-return-chart',
+					width: '100%'
 				},
-				xAxis: {
+				xaxis: {
 					type: 'datetime'
 				},
-				yAxis: {
+				yaxis: {
+					title: {
+						text: 'Return'
+					},
 					labels: {
-						formatter: (label: AxisLabelsFormatterContextObject) =>
-							`${Axis.prototype.defaultLabelFormatter.call(label)} %`
+						formatter: (label) => `${label} %`
 					}
 				},
-				series: [
-					{
-						name: `Capital Gain ${props.companyName}`,
-						data: capitalGainChartData()
-					},
-					{
-						name: `Total Return ${props.companyName}`,
-						data: totalReturnChartData()
-					}
-				]
+				stroke: {
+					show: true,
+					curve: 'smooth',
+					lineCap: 'butt',
+					colors: undefined,
+					width: 2,
+					dashArray: 0
+				}
 			};
+			const seriesApex = [
+				{
+					name: `Capital Gain ${props.companyName}`,
+					data: capitalGainChartData()
+				},
+				{
+					name: `Total Return ${props.companyName}`,
+					data: totalReturnChartData()
+				}
+			];
 
-			return {chartOptions};
+			return {chartOptionsApex, seriesApex};
 		}
 	});
 </script>
@@ -101,6 +108,6 @@
 <template>
 	<div class="my-5">
 		<h1 class="font-bold">Total Return Chart</h1>
-		<chart :options="chartOptions"></chart>
+		<apexchart height="500" type="line" :options="chartOptionsApex" :series="seriesApex"></apexchart>
 	</div>
 </template>
